@@ -1,15 +1,18 @@
+#!/usr/bin/env python3
+# coding=utf-8
+
 from colorama import Fore, Style
 
 def print_logo():
-    print(Fore.RED + """
+    print(f"""
     ██╗███╗   ██╗███████╗████████╗ █████╗      ██████╗ ███████╗██████╗  ██████╗ ██████╗ ████████╗
     ██║████╗  ██║██╔════╝╚══██╔══╝██╔══██╗    ██╔══██╗██╔════╝██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
     ██║██╔██╗ ██║███████╗   ██║   ███████║    ██████╔╝█████╗  ██████╔╝██║   ██║██████╔╝   ██║   
     ██║██║╚██╗██║╚════██║   ██║   ██╔══██║    ██╔══██╗██╔══╝  ██╔═══╝ ██║   ██║██╔══██╗   ██║   
     ██║██║ ╚████║███████║   ██║   ██║  ██║    ██║  ██║███████╗██║     ╚██████╔╝██║  ██║   ██║   
     ╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
-                                                                                    
-                        Instagram Mass Report Tool - By @grkmyldzz
+    
+                        {Fore.CYAN}Instagram Mass Report Tool - By @grkmyldzz{Style.RESET_ALL}
                         Use this tool responsibly and ethically.
                         This tool is for educational purposes only.
-    """ + Style.RESET_ALL) 
+    """) 

@@ -1,26 +1,25 @@
+#!/usr/bin/env python3
+# coding=utf-8
+
 from colorama import Fore, Style
-import os
+from os import path
 
 def print_success(message):
-    print(Fore.GREEN + "[ + ] " + message)
-    print(Style.RESET_ALL)
+    print(Fore.GREEN + "[ + ] " + message + Style.RESET_ALL)
 
 def print_error(message):
-    print(Fore.RED + "[ - ] " + message)
-    print(Style.RESET_ALL)
+    print(Fore.RED + "[ ! ] " + message + Style.RESET_ALL)
 
 def print_status(message):
-    print(Fore.YELLOW + "[ * ] " + message)
-    print(Style.RESET_ALL)
+    print(Fore.YELLOW + "[ * ] " + message + Style.RESET_ALL)
 
 def ask_question(message):
     return input(Fore.BLUE + "[ ? ] " + message + ": " + Style.RESET_ALL)
 
-def parse_proxy_file(file_path):
-    if not os.path.exists(file_path):
+def parse_proxy_file(proxy_file):
+    if not path.exists(proxy_file):
         print_error("Proxy file not found!")
         return []
         
-    with open(file_path, 'r') as file:
-        proxies = file.read().strip().split('\n')
-        return [proxy.strip() for proxy in proxies if proxy.strip()] 
+    with open(proxy_file, 'r') as file:
+        return [line.strip() for line in file if line.strip()] 
