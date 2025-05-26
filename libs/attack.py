@@ -1,6 +1,7 @@
 import requests
 from random import choice
 from .utils import print_success, print_error
+import json
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -8,24 +9,68 @@ USER_AGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15",
 ]
 
+REPORT_REASONS = {
+    "1": "spam",
+    "2": "self_injury",
+    "3": "hate_speech",
+    "4": "harassment",
+    "5": "violence",
+    "6": "scam",
+    "7": "false_information",
+    "8": "intellectual_property",
+}
+
 def get_headers():
     return {
         'User-Agent': choice(USER_AGENTS),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept': 'application/json, text/plain, */*',
         'Accept-Language': 'en-US,en;q=0.5',
+        'Content-Type': 'application/json',
+        'X-IG-App-ID': '936619743392459',
+        'Origin': 'https://www.instagram.com',
         'DNT': '1',
         'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
+        'Referer': 'https://www.instagram.com/',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
     }
 
-def report_profile_attack(username, proxy=None):
+def get_user_id(username, proxy=None):
     try:
-        url = f"https://www.tiktok.com/@{username}"
+        url = f"https://www.instagram.com/api/v1/users/web_profile_info/?username={username}"
         proxies = {'http': proxy, 'https': proxy} if proxy else None
         
         response = requests.get(url, headers=get_headers(), proxies=proxies, timeout=10)
         
         if response.status_code == 200:
+            data = response.json()
+            return data['data']['user']['id']
+        return None
+            
+    except Exception as e:
+        print_error(f"Error getting user ID: {str(e)}")
+        return None
+
+def report_profile_attack(username, proxy=None):
+    try:
+        user_id = get_user_id(username, proxy)
+        if not user_id:
+            print_error(f"Could not find user ID for: {username}")
+            return
+
+        url = "https://www.instagram.com/api/v1/users/report/"
+        proxies = {'http': proxy, 'https': proxy} if proxy else None
+        
+        data = {
+            "source_name": "profile",
+            "reason_id": choice(list(REPORT_REASONS.values())),
+            "user_id": user_id
+        }
+        
+        response = requests.post(url, headers=get_headers(), json=data, proxies=proxies, timeout=10)
+        
+        if response.status_code in [200, 201]:
             print_success(f"Successfully reported profile: {username}")
         else:
             print_error(f"Failed to report profile: {username}")
@@ -33,16 +78,26 @@ def report_profile_attack(username, proxy=None):
     except Exception as e:
         print_error(f"Error reporting profile: {str(e)}")
 
-def report_video_attack(video_url, proxy=None):
+def report_post_attack(post_url, proxy=None):
     try:
+        # Extract post ID from URL
+        post_id = post_url.split("/p/")[1].split("/")[0]
+        
+        url = "https://www.instagram.com/api/v1/media/report/"
         proxies = {'http': proxy, 'https': proxy} if proxy else None
         
-        response = requests.get(video_url, headers=get_headers(), proxies=proxies, timeout=10)
+        data = {
+            "source_name": "media_or_ad",
+            "reason_id": choice(list(REPORT_REASONS.values())),
+            "media_id": post_id
+        }
         
-        if response.status_code == 200:
-            print_success(f"Successfully reported video: {video_url}")
+        response = requests.post(url, headers=get_headers(), json=data, proxies=proxies, timeout=10)
+        
+        if response.status_code in [200, 201]:
+            print_success(f"Successfully reported post: {post_url}")
         else:
-            print_error(f"Failed to report video: {video_url}")
+            print_error(f"Failed to report post: {post_url}")
             
     except Exception as e:
-        print_error(f"Error reporting video: {str(e)}") 
+        print_error(f"Error reporting post: {str(e)}") 

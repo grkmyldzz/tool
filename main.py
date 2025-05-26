@@ -11,7 +11,7 @@ from os import path
 from libs.logo import print_logo
 from libs.utils import print_success, print_error, ask_question, print_status, parse_proxy_file
 from libs.proxy_harvester import find_proxies
-from libs.attack import report_profile_attack, report_video_attack
+from libs.attack import report_profile_attack, report_post_attack, REPORT_REASONS
 from multiprocessing import Process
 from colorama import Fore, Style
 
@@ -29,33 +29,33 @@ def profile_attack_process(username, proxy_list):
     for proxy in proxy_list:
         report_profile_attack(username, proxy)
 
-def video_attack_process(video_url, proxy_list):
+def post_attack_process(post_url, proxy_list):
     if len(proxy_list) == 0:
         for _ in range(10):
-            report_video_attack(video_url, None)
+            report_post_attack(post_url, None)
         return
 
     for proxy in proxy_list:
-        report_video_attack(video_url, proxy)
+        report_post_attack(post_url, proxy)
 
-def video_attack(proxies):
-    video_url = ask_question("Enter the link of the video you want to report")
+def post_attack(proxies):
+    post_url = ask_question("Enter the link of the Instagram post you want to report")
     print(Style.RESET_ALL)
     
     processes = []
     if len(proxies) == 0:
         for k in range(5):
-            p = Process(target=video_attack_process, args=(video_url, []))
+            p = Process(target=post_attack_process, args=(post_url, []))
             processes.append(p)
             p.start()
             print_status(f"{k + 1}. Transaction Opened!")
     else:
         chunk = list(chunks(proxies, 10))
         print("")
-        print_status("Video complaint attack is starting!\n")
+        print_status("Post complaint attack is starting!\n")
 
         for i, proxy_list in enumerate(chunk, 1):
-            p = Process(target=video_attack_process, args=(video_url, proxy_list))
+            p = Process(target=post_attack_process, args=(post_url, proxy_list))
             processes.append(p)
             p.start()
             print_status(f"{i}. Transaction Opened!")
@@ -64,7 +64,7 @@ def video_attack(proxies):
         p.join()
 
 def profile_attack(proxies):
-    username = ask_question("Enter the username of the person you want to report")
+    username = ask_question("Enter the Instagram username of the person you want to report")
     print(Style.RESET_ALL)
     
     processes = []
@@ -87,6 +87,12 @@ def profile_attack(proxies):
 
     for p in processes:
         p.join()
+
+def print_report_reasons():
+    print("\nAvailable report reasons:")
+    for key, value in REPORT_REASONS.items():
+        print(f"{key} - {value.replace('_', ' ').title()}")
+    print("")
 
 def main():
     print_success("Modules loaded!\n")
@@ -117,8 +123,8 @@ def main():
         exit(1)
 
     print("")
-    print_status("1 - Report the profile.")
-    print_status("2 - Report a video.")
+    print_status("1 - Report an Instagram profile")
+    print_status("2 - Report an Instagram post")
     report_choice = ask_question("Please select the complaint method")
     print("")
 
@@ -131,10 +137,12 @@ def main():
         print_error("The answer is not understood.")
         exit(1)
 
+    print_report_reasons()
+
     if choice == 1:
         profile_attack(proxies)
     else:
-        video_attack(proxies)
+        post_attack(proxies)
 
 if __name__ == "__main__":
     print_logo()
